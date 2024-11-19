@@ -3,93 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice to Text with Punctuation</title>
+    <title>English to Bengali Translator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 2em;
             background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
-        #transcription {
-            width: 80%;
-            height: 200px;
-            margin: 20px auto;
-            padding: 15px;
-            border: 2px solid #ccc;
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
             font-size: 16px;
-            overflow-y: auto;
-            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
-            border: none;
-            border-radius: 5px;
             background-color: #007bff;
             color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
             background-color: #0056b3;
         }
+        .output {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <h1>Voice to Text with Punctuation</h1>
-    <p>Click the button and start speaking. Say "comma," "period," "question mark," or "exclamation mark" for punctuation.</p>
-    <button id="start-stop">Start Listening</button>
-    <div id="transcription" contenteditable="true">Your transcriptions will appear here...</div>
+    <div class="container">
+        <h1>English to Bengali Translator</h1>
+        <textarea id="inputText" placeholder="Type English text here..."></textarea>
+        <button onclick="translateText()">Translate</button>
+        <div class="output" id="outputText">Translation will appear here...</div>
+    </div>
 
     <script>
-        const button = document.getElementById('start-stop');
-        const transcription = document.getElementById('transcription');
-        let recognition;
-        let listening = false;
+        async function translateText() {
+            const inputText = document.getElementById('inputText').value;
+            const outputText = document.getElementById('outputText');
 
-        // Check if the browser supports the Web Speech API
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
+            if (inputText.trim() === "") {
+                outputText.textContent = "Please enter some text to translate.";
+                return;
+            }
 
-            recognition.onresult = (event) => {
-                const transcript = Array.from(event.results)
-                    .map(result => result[0].transcript)
-                    .join(' ')
-                    .replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
-                    .replace(/\bperiod\b/gi, '.') // Replace "period" with "."
-                    .replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
-                    .replace(/\bexclamation mark\b/gi, '!'); // Replace "exclamation mark" with "!"
-                
-                transcription.innerText = transcript;
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-            };
-
-            recognition.onend = () => {
-                listening = false;
-                button.innerText = 'Start Listening';
-            };
-
-            button.addEventListener('click', () => {
-                if (listening) {
-                    recognition.stop();
-                } else {
-                    recognition.start();
-                    listening = true;
-                    button.innerText = 'Stop Listening';
-                }
-            });
-        } else {
-            alert('Your browser does not support speech recognition. Please try Google Chrome.');
+            try {
+                // Use the Google Translate API
+                const response = await fetch(
+                    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=bn&dt=t&q=${encodeURIComponent(inputText)}`
+                );
+                const data = await response.json();
+                outputText.textContent = data[0][0][0];
+            } catch (error) {
+                console.error("Translation error:", error);
+                outputText.textContent = "An error occurred while translating. Please try again.";
+            }
         }
     </script>
 </body>
 </html>
-
