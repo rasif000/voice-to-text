@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice to Text</title>
+    <title>Voice to Text with Punctuation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,8 +37,8 @@
     </style>
 </head>
 <body>
-    <h1>Voice to Text</h1>
-    <p>Click the button and start speaking. Your speech will appear below:</p>
+    <h1>Voice to Text with Punctuation</h1>
+    <p>Click the button and start speaking. Say "comma," "period," "question mark," or "exclamation mark" for punctuation.</p>
     <button id="start-stop">Start Listening</button>
     <div id="transcription" contenteditable="true">Your transcriptions will appear here...</div>
 
@@ -59,7 +59,12 @@
             recognition.onresult = (event) => {
                 const transcript = Array.from(event.results)
                     .map(result => result[0].transcript)
-                    .join('');
+                    .join(' ')
+                    .replace(/\bcomma\b/gi, ',') // Replace "comma" with ","
+                    .replace(/\bperiod\b/gi, '.') // Replace "period" with "."
+                    .replace(/\bquestion mark\b/gi, '?') // Replace "question mark" with "?"
+                    .replace(/\bexclamation mark\b/gi, '!'); // Replace "exclamation mark" with "!"
+                
                 transcription.innerText = transcript;
             };
 
@@ -87,3 +92,4 @@
     </script>
 </body>
 </html>
+
